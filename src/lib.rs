@@ -47,18 +47,15 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn get_locked_amount)]
     pub(super) type Locks<T: Config> =
-        StorageMap<_, Blake2_128Concat, (ChainID, T::AccountId), Balance, ValueQuery>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, (ChainID, Balance), ValueQuery>;
 
     // Pallets use events to inform users when important changes are made.
     // https://substrate.dev/docs/en/knowledgebase/runtime/events
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        /// Event documentation should end with an array that provides descriptive names for event
-        /// parameters. [something, who]
         LockedFunds(T::AccountId, Balance, ChainID),
-
-        UnlockedFunds(T::AccountId, u128),
+        UnlockedFunds(T::AccountId, Balance, ChainID),
     }
 
     // Errors inform users that something went wrong.
@@ -88,21 +85,24 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
-            <Locks<T>>::insert((destination_chain_id, who.clone()), amount);
+            <Locks<T>>::insert(who.clone(), (destination_chain_id, amount));
 
-            // Emit an event.
             Self::deposit_event(Event::LockedFunds(who, amount, destination_chain_id));
-            // Return a successful DispatchResultWithPostInfo
+
             Ok(())
         }
 
         #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-        pub fn unlock(origin: OriginFor<T>, proof: super::stub::Proof) -> DispatchResult {
+        pub fn unlock(
+            origin: OriginFor<T>,
+            proof: super::stub::Proof,
+            chain_id: ChainID,
+        ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
             if proof {
                 // Emit an event.
-                Self::deposit_event(Event::UnlockedFunds(who, 123));
+                Self::deposit_event(Event::UnlockedFunds(who, 123, chain_id));
                 // Actually unlock the funds in the dest chain
                 Ok(())
             } else {
@@ -111,7 +111,6 @@ pub mod pallet {
         }
     }
 }
-
 
 pub mod stub {
     pub type Proof = bool;

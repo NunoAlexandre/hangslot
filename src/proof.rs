@@ -1,5 +1,5 @@
 use merkle::MerkleTree;
-use parity_scale_codec_derive::{Encode, Decode};
+use parity_scale_codec_derive::{Decode, Encode};
 
 #[derive(Debug, Clone, PartialEq, Eq, Encode, Decode)]
 pub struct Proof {
@@ -7,7 +7,6 @@ pub struct Proof {
     block_hash: Vec<u8>,
     transactions: Vec<Transaction>,
 }
-
 
 impl Proof {
     fn transactions(self) -> Vec<String> {
@@ -28,7 +27,8 @@ impl Proof {
             ],
         );
         let expected_block_hash = meta_merkle.root_hash();
-        return self.block_hash == expected_block_hash.clone();
+        
+        self.block_hash == expected_block_hash.clone()
     }
 }
 
@@ -86,11 +86,9 @@ fn test_proof() {
     assert!(proof.is_valid());
 }
 
-
-
-/// The proof failed validation. 
-/// We change a detail in the Transation::CrossChainTransfer tx which 
-/// makes the proof invalid. 
+/// The proof failed validation.
+/// We change a detail in the Transation::CrossChainTransfer tx which
+/// makes the proof invalid.
 #[test]
 fn test_invalid_proof() {
     let txs = vec![
