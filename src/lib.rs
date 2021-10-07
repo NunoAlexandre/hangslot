@@ -97,10 +97,10 @@ pub mod pallet {
         }
 
         #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-        pub fn unlock(origin: OriginFor<T>, proof: crate::proof::Proof) -> DispatchResult {
+        pub fn unlock(origin: OriginFor<T>, proof: super::stub::Proof) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
-            if proof.is_valid() {
+            if proof {
                 // Emit an event.
                 Self::deposit_event(Event::UnlockedFunds(who, 123));
                 // Actually unlock the funds in the dest chain
@@ -110,4 +110,9 @@ pub mod pallet {
             }
         }
     }
+}
+
+
+pub mod stub {
+    pub type Proof = bool;
 }

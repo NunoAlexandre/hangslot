@@ -25,7 +25,7 @@ fn unlock_funds_with_valid_proof() {
     new_test_ext().execute_with(|| {
         assert_ok!(TemplateModule::unlock(
             Origin::signed(1),
-            vec![1, 2, 3, 4, 5]
+            true
         ));
     });
 }
@@ -33,7 +33,7 @@ fn unlock_funds_with_valid_proof() {
 #[test]
 fn unlock_funds_with_invalid_proof() {
     new_test_ext().execute_with(|| {
-        let res = TemplateModule::unlock(Origin::signed(1), vec![6, 7, 8, 9, 10]);
+        let res = TemplateModule::unlock(Origin::signed(1), false);
         assert_noop!(res, Error::<Test>::InvalidProof);
     });
 }

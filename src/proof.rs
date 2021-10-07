@@ -83,16 +83,37 @@ fn test_proof() {
         transactions: txs,
     };
 
-    let t = MerkleTree::from_vec(&ring::digest::SHA512, proof.clone().transactions());
-
-    println!("Merkle root: {:?}", t.root_hash());
-
-    let t2 = MerkleTree::from_vec(
-        &ring::digest::SHA512,
-        vec![proof.prev_block_hash.clone(), t.root_hash().clone()],
-    );
-
-    println!("Block Hash: {:?}", t2.root_hash());
-
     assert!(proof.is_valid());
+}
+
+
+
+/// The proof failed validation. 
+/// We change a detail in the Transation::CrossChainTransfer tx which 
+/// makes the proof invalid. 
+#[test]
+fn test_invalid_proof() {
+    let txs = vec![
+        Transaction::Hash("tx-111".to_string()),
+        Transaction::CrossChainTransfer {
+            who: "0xdfkdfjh".to_string(),
+            amount: 4422,
+            dest_chain_id: 99,
+        },
+    ];
+
+    let block_hash = vec![
+        239, 198, 146, 191, 146, 223, 233, 132, 124, 130, 225, 216, 129, 162, 40, 55, 150, 247,
+        195, 109, 236, 56, 168, 34, 156, 176, 66, 47, 151, 242, 103, 21, 251, 148, 21, 120, 82, 42,
+        244, 236, 211, 102, 37, 30, 93, 211, 241, 152, 18, 226, 69, 121, 242, 208, 167, 170, 51,
+        221, 129, 153, 134, 20, 82, 197,
+    ];
+
+    let proof = Proof {
+        prev_block_hash: "block-111".into(),
+        block_hash,
+        transactions: txs,
+    };
+
+    assert!(!proof.is_valid());
 }
